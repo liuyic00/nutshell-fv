@@ -22,7 +22,7 @@ import chisel3.util.experimental.BoringUtils
 import utils._
 import difftest._
 
-import rvspeccore.checker.CheckerWithWB
+import rvspeccore.checker._
 import rvspeccore.core.{RiscvCore, RV64Config}
 import rvspeccore.core.spec._
 
@@ -100,12 +100,12 @@ class WBU(implicit val p: NutCoreConfig) extends NutCoreModule{
       BoringUtils.addSource(io.wb.rfData, "ilaWBUrfData")
     }
     if (p.Formal) {
-      val checker = Module(new CheckerWithWB()(RV64Config()))
+      val checker = Module(new CheckerWithWB(checkMem = false)(RV64Config()))
 
-      val tmpInst = io.in.bits.decode.cf.instr
+      val tmpInst = io.in.bits.decode.cf.instr(31, 0)
       // ADDI
       when (io.in.valid){
-        assume(tmpInst(6, 0) === OpcodeMap("OP-IMM") && tmpInst(14, 12) === Funct3Map("ADDI"))
+        assume(IsInst("ADDI", tmpInst))
       }
 
       checker.io.instCommit.valid := io.in.valid
