@@ -101,13 +101,6 @@ class WBU(implicit val p: NutCoreConfig) extends NutCoreModule{
     }
     if (p.Formal) {
       val checker = Module(new CheckerWithWB(checkMem = false)(RV64Config()))
-      implicit val checker_xlen = 64
-
-      val tmpInst = io.in.bits.decode.cf.instr(31, 0)
-      // ADDI
-      when (io.in.valid){
-        assume(IsInst("ADDI", tmpInst))
-      }
 
       checker.io.instCommit.valid := io.in.valid
       checker.io.instCommit.inst  := io.in.bits.decode.cf.instr

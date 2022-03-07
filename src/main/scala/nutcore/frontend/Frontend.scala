@@ -23,6 +23,8 @@ import utils._
 import bus.simplebus._
 import chisel3.experimental.IO
 
+import rvspeccore.checker._
+
 class FrontendIO(implicit val p: NutCoreConfig) extends Bundle with HasNutCoreConst {
   val imem = new SimpleBusUC(userBits = ICacheUserBundleWidth, addrBits = VAddrBits)
   val out = Vec(2, Decoupled(new DecodeIO))
@@ -115,6 +117,98 @@ class Frontend_inorder(implicit val p: NutCoreConfig) extends NutCoreModule with
   io.bpFlush <> ifu.io.bpFlush
   io.ipf <> ifu.io.ipf
   io.imem <> ifu.io.imem
+
+  if (p.Formal) {
+    // here is the earliest place to assume the inst
+    // before this, the inst may not been assemble/splite to 32bit
+    val tmpInst = ibf.io.out.bits.instr(31, 0)
+    implicit val checker_xlen = 64
+
+    when (ibf.io.out.valid){
+      val instN = 1
+      if (instN == 1){
+        assume(
+          IsInst("ADDI", tmpInst)
+        )
+      } else if (instN == 9) {
+        // OP-IMM
+        assume(
+          IsInst("ADDI", tmpInst) ||
+          IsInst("SLTI", tmpInst) ||
+          IsInst("SLTIU", tmpInst) ||
+          IsInst("ANDI", tmpInst) ||
+          IsInst("ORI", tmpInst) ||
+          IsInst("XORI", tmpInst) ||
+          IsInst("SLLI", tmpInst) ||
+          IsInst("SRLI", tmpInst) ||
+          IsInst("SRAI", tmpInst)
+        )
+      } else if (instN == 20) {
+        assume(
+          IsInst("BNE", tmpInst) ||
+          IsInst("BLT", tmpInst) ||
+          IsInst("OR", tmpInst) ||
+          IsInst("ADD", tmpInst) ||
+          IsInst("JAL", tmpInst) ||
+          IsInst("ADDW", tmpInst) ||
+          IsInst("SLLI", tmpInst) ||
+          IsInst("SRLI", tmpInst) ||
+          IsInst("SUB", tmpInst) ||
+          IsInst("ADDIW", tmpInst) ||
+          IsInst("SRL", tmpInst) ||
+          IsInst("ANDI", tmpInst) ||
+          IsInst("SLLW", tmpInst) ||
+          IsInst("BLTU", tmpInst) ||
+          IsInst("BGE", tmpInst) ||
+          IsInst("SRLW", tmpInst) ||
+          IsInst("ORI", tmpInst) ||
+          IsInst("ADDI", tmpInst) ||
+          IsInst("BGEU", tmpInst) ||
+          IsInst("SRAW", tmpInst)
+        )
+      } else if (instN == 35) {
+        assume(
+          IsInst("BNE", tmpInst) ||
+          IsInst("BLT", tmpInst) ||
+          IsInst("OR", tmpInst) ||
+          IsInst("ADD", tmpInst) ||
+          IsInst("JAL", tmpInst) ||
+          IsInst("ADDW", tmpInst) ||
+          IsInst("SLLI", tmpInst) ||
+          IsInst("SRLI", tmpInst) ||
+          IsInst("SUB", tmpInst) ||
+          IsInst("ADDIW", tmpInst) ||
+          IsInst("SRL", tmpInst) ||
+          IsInst("ANDI", tmpInst) ||
+          IsInst("SLLW", tmpInst) ||
+          IsInst("BLTU", tmpInst) ||
+          IsInst("BGE", tmpInst) ||
+          IsInst("SRLW", tmpInst) ||
+          IsInst("ORI", tmpInst) ||
+          IsInst("ADDI", tmpInst) ||
+          IsInst("BGEU", tmpInst) ||
+          IsInst("SRAW", tmpInst) ||
+          IsInst("XOR", tmpInst) ||
+          IsInst("LUI", tmpInst) ||
+          IsInst("SLTIU", tmpInst) ||
+          IsInst("SRA", tmpInst) ||
+          IsInst("BEQ", tmpInst) ||
+          IsInst("SLTI", tmpInst) ||
+          IsInst("SUBW", tmpInst) ||
+          IsInst("JALR", tmpInst) ||
+          IsInst("SLL", tmpInst) ||
+          IsInst("SLTU", tmpInst) ||
+          IsInst("SRAI", tmpInst) ||
+          IsInst("AUIPC", tmpInst) ||
+          IsInst("AND", tmpInst) ||
+          IsInst("XORI", tmpInst) ||
+          IsInst("SLT", tmpInst)
+        )
+      } else {
+        assert(false.B)
+      }
+    }
+  }
 
   Debug("------------------------ FRONTEND:------------------------\n")
   Debug("flush = %b, ifu:(%d,%d), idu:(%d,%d)\n",
