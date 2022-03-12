@@ -57,8 +57,9 @@ object FormalSettings {
     "HasPrefetch" -> false,
     "HasDcache" -> false,
     "HasIcache" -> false,
+
     "MmodeOnly" -> true,
-    "EnableRVC" -> false
+    "EnableRVC" -> true
   )
 }
 

@@ -100,7 +100,7 @@ class WBU(implicit val p: NutCoreConfig) extends NutCoreModule{
       BoringUtils.addSource(io.wb.rfData, "ilaWBUrfData")
     }
     if (p.Formal) {
-      val checker = Module(new CheckerWithWB(checkMem = false)(RV64Config()))
+      val checker = Module(new CheckerWithWB(checkMem = false)(RV64Config("MC")))
 
       checker.io.instCommit.valid := io.in.valid
       checker.io.instCommit.inst  := io.in.bits.decode.cf.instr
