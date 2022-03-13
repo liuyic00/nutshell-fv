@@ -95,9 +95,13 @@ class EXU(implicit val p: NutCoreConfig) extends NutCoreModule {
   io.out.bits.decode.cf.instr := io.in.bits.cf.instr
   io.out.bits.decode.cf.runahead_checkpoint_id := io.in.bits.cf.runahead_checkpoint_id
   io.out.bits.decode.cf.isBranch := io.in.bits.cf.isBranch
-  io.out.bits.decode.cf.redirect <>
-    Mux(mou.io.redirect.valid, mou.io.redirect,
-      Mux(csr.io.redirect.valid, csr.io.redirect, alu.io.redirect))
+  when (mou.io.redirect.valid) {
+    io.out.bits.decode.cf.redirect <> mou.io.redirect
+  }.elsewhen(csr.io.redirect.valid) {
+    io.out.bits.decode.cf.redirect <> csr.io.redirect
+  }.otherwise {
+    io.out.bits.decode.cf.redirect <> alu.io.redirect
+  }
   
   Debug(mou.io.redirect.valid || csr.io.redirect.valid || alu.io.redirect.valid, "[REDIRECT] mou %x csr %x alu %x \n", mou.io.redirect.valid, csr.io.redirect.valid, alu.io.redirect.valid)
   Debug(mou.io.redirect.valid || csr.io.redirect.valid || alu.io.redirect.valid, "[REDIRECT] flush: %d mou %x csr %x alu %x\n", io.flush, mou.io.redirect.target, csr.io.redirect.target, alu.io.redirect.target)
