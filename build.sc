@@ -26,22 +26,20 @@ trait HasChisel3 extends ScalaModule {
     )
   }
   override def ivyDeps = Agg(
-    ivy"edu.berkeley.cs::chisel3:3.5-SNAPSHOT"
+    ivy"edu.berkeley.cs::chisel3:3.6-SNAPSHOT"
   )
   override def scalacPluginIvyDeps = Agg(
-    ivy"edu.berkeley.cs:::chisel3-plugin:3.5-SNAPSHOT",
+    ivy"edu.berkeley.cs:::chisel3-plugin:3.6-SNAPSHOT",
     ivy"org.scalamacros:::paradise:2.1.1"
   )
 }
 
 trait HasChiselTests extends CrossSbtModule {
-  object test extends Tests {
+  object test extends Tests with TestModule.ScalaTest{
     override def ivyDeps = Agg(
       ivy"org.scalatest::scalatest:3.0.4",
-      ivy"edu.berkeley.cs::chisel-iotesters:1.2+",
-      ivy"edu.berkeley.cs::chiseltest:0.5-SNAPSHOT"
+      ivy"edu.berkeley.cs::chiseltest:0.6-SNAPSHOT"
     )
-    def testFrameworks = Seq("org.scalatest.tools.Framework")
   }
 }
 
