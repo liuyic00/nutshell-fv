@@ -200,46 +200,28 @@ class NutCore(implicit val p: NutCoreConfig) extends NutCoreModule {
         width := sz2wth(backend.io.dmem.req.bits.size)
       }
 
-      val memReadValid = WireInit(false.B)
-      val memReadAddr  = WireInit(0.U(64.W))
-      val memReadData  = WireInit(0.U(64.W))
-      val memReadWidth = WireInit(0.U(log2Ceil(64 + 1).W))
-
-      val memWriteValid = WireInit(false.B)
-      val memWirteAddr  = WireInit(0.U(64.W))
-      val memWirteData  = WireInit(0.U(64.W))
-      val memWirteWidth = WireInit(0.U(log2Ceil(64 + 1).W))
+      val mem = rvspeccore.checker.ConnectCheckerResult.makeMemSource()(64)
 
       when(backend.io.dmem.resp.fire) {
         // load or store complete
         when(isRead) {
           isRead       := false.B
-          memReadValid := true.B
-          memReadAddr  := SignExt(addr, 64)
-          memReadData  := backend.io.dmem.resp.bits.rdata
-          memReadWidth := width
+          mem.read.valid := true.B
+          mem.read.addr  := SignExt(addr, 64)
+          mem.read.data  := backend.io.dmem.resp.bits.rdata
+          mem.read.memWidth := width
         }.elsewhen(isWrite) {
           isWrite       := false.B
-          memWriteValid := true.B
-          memWirteAddr  := SignExt(addr, 64)
-          memWirteData  := wdata
-          memWirteWidth := width
+          mem.write.valid := true.B
+          mem.write.addr  := SignExt(addr, 64)
+          mem.write.data  := wdata
+          mem.write.memWidth := width
           // pass addr wdata wmask
         }.otherwise {
           // assert(false.B)
           // may receive some acceptable error resp, but microstructure can handle
         }
       }
-
-      BoringUtils.addSource(memReadValid, "memReadValid")
-      BoringUtils.addSource(memReadAddr,  "memReadAddr")
-      BoringUtils.addSource(memReadData,  "memReadData")
-      BoringUtils.addSource(memReadWidth, "memReadWidth")
-
-      BoringUtils.addSource(memWriteValid, "memWriteValid")
-      BoringUtils.addSource(memWirteAddr,  "memWirteAddr")
-      BoringUtils.addSource(memWirteData,  "memWirteData")
-      BoringUtils.addSource(memWirteWidth, "memWirteWidth")
     }
   }
 

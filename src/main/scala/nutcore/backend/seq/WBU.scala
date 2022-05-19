@@ -106,41 +106,7 @@ class WBU(implicit val p: NutCoreConfig) extends NutCoreModule{
       checker.io.instCommit.inst  := RegNext(io.in.bits.decode.cf.instr)
       checker.io.instCommit.pc    := RegNext(SignExt(io.in.bits.decode.cf.pc, AddrBits))
 
-      ConnectCheckerResult.setChecker(checker)(XLEN)
-
-      val memReadValid = WireInit(false.B)
-      val memReadAddr  = WireInit(0.U(64.W))
-      val memReadData  = WireInit(0.U(64.W))
-      val memReadWidth = WireInit(0.U(log2Ceil(64 + 1).W))
-      memReadValid := DontCare
-      memReadAddr  := DontCare
-      memReadData  := DontCare
-      memReadWidth := DontCare
-      BoringUtils.addSink(memReadValid, "memReadValid")
-      BoringUtils.addSink(memReadAddr,  "memReadAddr")
-      BoringUtils.addSink(memReadData,  "memReadData")
-      BoringUtils.addSink(memReadWidth, "memReadWidth")
-      checker.io.mem.get.read.valid    := RegNext(RegNext(memReadValid))
-      checker.io.mem.get.read.addr     := RegNext(RegNext(memReadAddr))
-      checker.io.mem.get.read.data     := RegNext(RegNext(memReadData))
-      checker.io.mem.get.read.memWidth := RegNext(RegNext(memReadWidth))
-
-      val memWriteValid = Wire(Bool())
-      val memWirteAddr  = Wire(UInt(64.W))
-      val memWirteData  = Wire(UInt(64.W))
-      val memWirteWidth = Wire(UInt(log2Ceil(64 + 1).W))
-      memWriteValid := DontCare
-      memWirteAddr  := DontCare
-      memWirteData  := DontCare
-      memWirteWidth := DontCare
-      BoringUtils.addSink(memWriteValid, "memWriteValid")
-      BoringUtils.addSink(memWirteAddr,  "memWirteAddr")
-      BoringUtils.addSink(memWirteData,  "memWirteData")
-      BoringUtils.addSink(memWirteWidth, "memWirteWidth")
-      checker.io.mem.get.write.valid    := RegNext(RegNext(memWriteValid))
-      checker.io.mem.get.write.addr     := RegNext(RegNext(memWirteAddr))
-      checker.io.mem.get.write.data     := RegNext(RegNext(memWirteData))
-      checker.io.mem.get.write.memWidth := RegNext(RegNext(memWirteWidth))
+      ConnectCheckerResult.setChecker(checker, 2)(XLEN)
 
       when (RegNext(io.in.valid && rvspeccore.checker.RVI.loadStore(io.in.bits.decode.cf.instr)(64), false.B)) {
         assert(false.B)
