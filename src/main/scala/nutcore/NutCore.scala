@@ -169,6 +169,78 @@ class NutCore(implicit val p: NutCoreConfig) extends NutCoreModule {
     dmemXbar.io.in(3) <> io.frontend
 
     io.mmio <> mmioXbar.io.out
+
+    if (p.FPGAPlatform && p.Formal) {
+      val isRead  = RegInit(false.B)
+      val isWrite = RegInit(false.B)
+      val addr    = RegInit(0.U(39.W))
+      val wdata   = RegInit(0.U)
+      val width   = RegInit(0.U(log2Ceil(64 + 1).W))
+
+      def sz2wth(size: UInt) = {
+        MuxLookup(size, 0.U, List(
+          0.U -> 8.U,
+          1.U -> 16.U,
+          2.U -> 32.U,
+          3.U -> 64.U
+        ))
+      }
+
+      when(backend.io.dmem.isWrite()) {
+        isWrite := true.B
+        isRead  := false.B
+        addr  := backend.io.dmem.req.bits.addr
+        wdata := backend.io.dmem.req.bits.wdata
+        width := sz2wth(backend.io.dmem.req.bits.size)
+      }
+      when(backend.io.dmem.isRead()) {
+        isRead  := true.B
+        isWrite := false.B
+        addr  := backend.io.dmem.req.bits.addr
+        width := sz2wth(backend.io.dmem.req.bits.size)
+      }
+
+      val memReadValid = WireInit(false.B)
+      val memReadAddr  = WireInit(0.U(64.W))
+      val memReadData  = WireInit(0.U(64.W))
+      val memReadWidth = WireInit(0.U(log2Ceil(64 + 1).W))
+
+      val memWriteValid = WireInit(false.B)
+      val memWirteAddr  = WireInit(0.U(64.W))
+      val memWirteData  = WireInit(0.U(64.W))
+      val memWirteWidth = WireInit(0.U(log2Ceil(64 + 1).W))
+
+      when(backend.io.dmem.resp.fire) {
+        // load or store complete
+        when(isRead) {
+          isRead       := false.B
+          memReadValid := true.B
+          memReadAddr  := SignExt(addr, 64)
+          memReadData  := backend.io.dmem.resp.bits.rdata
+          memReadWidth := width
+        }.elsewhen(isWrite) {
+          isWrite       := false.B
+          memWriteValid := true.B
+          memWirteAddr  := SignExt(addr, 64)
+          memWirteData  := wdata
+          memWirteWidth := width
+          // pass addr wdata wmask
+        }.otherwise {
+          // assert(false.B)
+          // may receive some acceptable error resp, but microstructure can handle
+        }
+      }
+
+      BoringUtils.addSource(memReadValid, "memReadValid")
+      BoringUtils.addSource(memReadAddr,  "memReadAddr")
+      BoringUtils.addSource(memReadData,  "memReadData")
+      BoringUtils.addSource(memReadWidth, "memReadWidth")
+
+      BoringUtils.addSource(memWriteValid, "memWriteValid")
+      BoringUtils.addSource(memWirteAddr,  "memWirteAddr")
+      BoringUtils.addSource(memWirteData,  "memWirteData")
+      BoringUtils.addSource(memWirteWidth, "memWirteWidth")
+    }
   }
 
   Debug("------------------------ BACKEND ------------------------\n")
