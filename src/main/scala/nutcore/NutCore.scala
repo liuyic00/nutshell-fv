@@ -169,6 +169,60 @@ class NutCore(implicit val p: NutCoreConfig) extends NutCoreModule {
     dmemXbar.io.in(3) <> io.frontend
 
     io.mmio <> mmioXbar.io.out
+
+    if (p.FPGAPlatform && p.Formal) {
+      val isRead  = RegInit(false.B)
+      val isWrite = RegInit(false.B)
+      val addr    = RegInit(0.U(39.W))
+      val wdata   = RegInit(0.U)
+      val width   = RegInit(0.U(log2Ceil(64 + 1).W))
+
+      def sz2wth(size: UInt) = {
+        MuxLookup(size, 0.U, List(
+          0.U -> 8.U,
+          1.U -> 16.U,
+          2.U -> 32.U,
+          3.U -> 64.U
+        ))
+      }
+
+      when(backend.io.dmem.isWrite()) {
+        isWrite := true.B
+        isRead  := false.B
+        addr  := backend.io.dmem.req.bits.addr
+        wdata := backend.io.dmem.req.bits.wdata
+        width := sz2wth(backend.io.dmem.req.bits.size)
+      }
+      when(backend.io.dmem.isRead()) {
+        isRead  := true.B
+        isWrite := false.B
+        addr  := backend.io.dmem.req.bits.addr
+        width := sz2wth(backend.io.dmem.req.bits.size)
+      }
+
+      val mem = rvspeccore.checker.ConnectCheckerResult.makeMemSource()(64)
+
+      when(backend.io.dmem.resp.fire) {
+        // load or store complete
+        when(isRead) {
+          isRead       := false.B
+          mem.read.valid := true.B
+          mem.read.addr  := SignExt(addr, 64)
+          mem.read.data  := backend.io.dmem.resp.bits.rdata
+          mem.read.memWidth := width
+        }.elsewhen(isWrite) {
+          isWrite       := false.B
+          mem.write.valid := true.B
+          mem.write.addr  := SignExt(addr, 64)
+          mem.write.data  := wdata
+          mem.write.memWidth := width
+          // pass addr wdata wmask
+        }.otherwise {
+          // assert(false.B)
+          // may receive some acceptable error resp, but microstructure can handle
+        }
+      }
+    }
   }
 
   Debug("------------------------ BACKEND ------------------------\n")

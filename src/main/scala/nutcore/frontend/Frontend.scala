@@ -125,7 +125,7 @@ class Frontend_inorder(implicit val p: NutCoreConfig) extends NutCoreModule with
     implicit val checker_xlen = 64
 
     when (ibf.io.out.valid){
-      assume(RVI.regImm(tmpInst) || RVI.regReg(tmpInst) || RVI.control(tmpInst))
+      assume(RVI.regImm(tmpInst) || RVI.loadStore(tmpInst))
     }
   }
 

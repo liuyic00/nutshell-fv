@@ -429,6 +429,10 @@ class LSExecUnit extends NutCoreModule {
   io.loadAddrMisaligned :=  valid && !isStore && !isAMO && !addrAligned
   io.storeAddrMisaligned := valid && (isStore || isAMO) && !addrAligned
 
+  // Formal assume
+  assume(io.loadAddrMisaligned === false.B)
+  assume(io.storeAddrMisaligned === false.B)
+
   Debug(io.loadAddrMisaligned || io.storeAddrMisaligned, "misaligned addr detected\n")
 
   BoringUtils.addSource(dmem.isRead() && dmem.req.fire, "perfCntCondMloadInstr")

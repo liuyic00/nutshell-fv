@@ -22,6 +22,6 @@ class NutCoreFormalSpec extends AnyFlatSpec with Formal with ChiselScalatestTest
     }
 
     // verify
-    verify(new NutCore()(NutCoreConfig()), Seq(BoundedCheck(50), BtormcEngineAnnotation))
+    verify(new NutCore()(NutCoreConfig()), Seq(BoundedCheck(12), BtormcEngineAnnotation))
   }
 }
