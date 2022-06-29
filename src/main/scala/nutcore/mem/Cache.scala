@@ -336,7 +336,7 @@ sealed class CacheStage3(implicit val cacheConfig: CacheConfig) extends CacheMod
   io.mmio.req.valid := (state === s_mmioReq)
 
   val afterFirstRead = RegInit(false.B)
-  val alreadyOutFire = RegEnable(true.B, init = false.B, io.out.fire)
+  val alreadyOutFire = RegEnable(true.B, false.B, io.out.fire)
   val readingFirst = !afterFirstRead && io.mem.resp.fire && (state === s_memReadResp)
   val inRdataRegDemand = RegEnable(Mux(mmio, io.mmio.resp.bits.rdata, io.mem.resp.bits.rdata),
                                    Mux(mmio, state === s_mmioResp, readingFirst))
@@ -567,7 +567,7 @@ class Cache_fake(implicit val cacheConfig: CacheConfig) extends CacheModule with
   when (io.flush(0) && (state =/= s_idle)) { needFlush := true.B }
   when (state === s_idle && needFlush) { needFlush := false.B }
 
-  val alreadyOutFire = RegEnable(true.B, init = false.B, io.in.resp.fire)
+  val alreadyOutFire = RegEnable(true.B, false.B, io.in.resp.fire)
 
   switch (state) {
     is (s_idle) {
