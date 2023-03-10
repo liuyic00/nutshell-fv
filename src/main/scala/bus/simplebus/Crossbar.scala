@@ -36,9 +36,7 @@ class SimpleBusCrossbar1toN(addressSpace: List[(Long, Long)]) extends Module {
   val outMatchVec = VecInit(addressSpace.map(
     range => (addr >= range._1.U && addr < (range._1 + range._2).U)))
   val outSelVec = VecInit(PriorityEncoderOH(outMatchVec))
-  val outSelRespVec = RegEnable(next=outSelVec,
-                                init=VecInit(Seq.fill(outSelVec.length)(false.B)),
-                                enable=io.in.req.fire() && state === s_idle)
+  val outSelRespVec = RegEnable(outSelVec,VecInit(Seq.fill(outSelVec.length)(false.B)),(io.in.req.fire && state === s_idle))
   val reqInvalidAddr = io.in.req.valid && !outSelVec.asUInt.orR
 
   when (reqInvalidAddr) {
@@ -50,11 +48,11 @@ class SimpleBusCrossbar1toN(addressSpace: List[(Long, Long)]) extends Module {
 
   switch (state) {
     is (s_idle) {
-      when (io.in.req.fire()) { state := s_resp }
+      when (io.in.req.fire) { state := s_resp }
       when (reqInvalidAddr) { state := s_error }
     }
-    is (s_resp) { when (io.in.resp.fire()) { state := s_idle } }
-    is (s_error) { when (io.in.resp.fire()) { state := s_idle } }
+    is (s_resp) { when (io.in.resp.fire) { state := s_idle } }
+    is (s_error) { when (io.in.resp.fire) { state := s_idle } }
   }
 
   // bind out.req channel
@@ -73,10 +71,10 @@ class SimpleBusCrossbar1toN(addressSpace: List[(Long, Long)]) extends Module {
   // io.in.resp.bits.exc.get := state === s_error
 
   Debug() {
-    when (io.in.req.fire()) {
+    when (io.in.req.fire) {
       printf(p"${GTimer()}: xbar: outSelVec = ${outSelVec}, outSel.req: ${io.in.req.bits}\n")
     }
-    when (io.in.resp.fire()) {
+    when (io.in.resp.fire) {
       printf(p"${GTimer()}: xbar: outSelVec = ${outSelVec}, outSel.resp: ${io.in.resp.bits}\n")
     }
   }
