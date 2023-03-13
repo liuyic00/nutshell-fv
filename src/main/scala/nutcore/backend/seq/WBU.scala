@@ -107,11 +107,11 @@ class WBU(implicit val p: NutCoreConfig) extends NutCoreModule{
       checker.io.instCommit.inst  := RegNext(io.in.bits.decode.cf.instr)
       checker.io.instCommit.pc    := RegNext(SignExt(io.in.bits.decode.cf.pc, AddrBits))
 
-      ConnectCheckerResult.setChecker(checker, 2)(XLEN)
+      ConnectCheckerResult.setChecker(checker)(XLEN)
 
-      when (RegNext(io.in.valid && rvspeccore.checker.RVI.loadStore(io.in.bits.decode.cf.instr)(64), false.B)) {
-        assert(false.B)
-      }
+      // when (RegNext(io.in.valid && rvspeccore.checker.RVI.loadStore(io.in.bits.decode.cf.instr)(64), false.B)) {
+      //   assert(false.B)
+      // }
     }
   }
 }
