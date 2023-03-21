@@ -932,12 +932,12 @@ class CSR(implicit val p: NutCoreConfig) extends NutCoreModule with HasCSRConst{
       // resultCSRWire.mscratch  := RegNext(mscratch)
       resultCSRWire.mtvec     := RegNext(mtvec)
       // resultCSRWire.mideleg   := RegNext(mideleg)
-      resultCSRWire.medeleg   := RegNext(medeleg)
+      // resultCSRWire.medeleg   := RegNext(medeleg)
       // resultCSRWire.mip       := RegNext(mipReg) //FIXME: 为什么是mipReg
       // resultCSRWire.mie       := RegNext(mie)
       // resultCSRWire.mepc      := RegNext(mepc)
       // resultCSRWire.mcause    := RegNext(mcause)
-      resultCSRWire.mtval     := RegNext(mtval)
+      // resultCSRWire.mtval     := RegNext(mtval)
       // resultCSRWire.cycle     := 0.U //FIXME: how to deal with unimplemented CSRs
       // resultCSRWire.sstatus   := RegNext(mstatus & sstatusRmask)
       // resultCSRWire.sepc      := RegNext(sepc)
