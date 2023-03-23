@@ -27,3 +27,8 @@ jobs:
         uses: coursier/cache-action@v5
       - name: mill Test
         run: mill _.test
+      - name: Archive production artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: Btormc Output Files
+          path: test_run_dir/NutCoreFormal_should_pass

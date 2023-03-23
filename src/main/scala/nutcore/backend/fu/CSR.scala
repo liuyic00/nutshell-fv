@@ -927,28 +927,25 @@ class CSR(implicit val p: NutCoreConfig) extends NutCoreModule with HasCSRConst{
       resultCSRWire.marchid   := RegNext(marchid)
       resultCSRWire.mimpid    := RegNext(mimpid)
       resultCSRWire.mhartid   := RegNext(mhartid)
-      // resultCSRWire.mstatus   := RegNext(mstatus)
-      // // resultCSRWire.mstatush  := 0.U //FIXME: how to deal with unimplemented CSRs
-      // resultCSRWire.mscratch  := RegNext(mscratch)
+      resultCSRWire.mstatus   := RegNext(mstatus)
+      // resultCSRWire.mstatush  := 0.U //FIXME: how to deal with unimplemented CSRs
+      // resultCSRWire.sstatus   := RegNext(mstatus & sstatusRmask) // FIXME: 
+      resultCSRWire.mepc      := RegNext(mepc)
+      resultCSRWire.sepc      := RegNext(sepc)
+      resultCSRWire.mtval     := RegNext(mtval)
+      resultCSRWire.stval     := RegNext(stval)
       resultCSRWire.mtvec     := RegNext(mtvec)
-      // resultCSRWire.mideleg   := RegNext(mideleg)
-      // resultCSRWire.medeleg   := RegNext(medeleg)
-      // resultCSRWire.mip       := RegNext(mipReg) //FIXME: 为什么是mipReg
-      // resultCSRWire.mie       := RegNext(mie)
-      // resultCSRWire.mepc      := RegNext(mepc)
-      // resultCSRWire.mcause    := RegNext(mcause)
-      // resultCSRWire.mtval     := RegNext(mtval)
-      // resultCSRWire.cycle     := 0.U //FIXME: how to deal with unimplemented CSRs
-      // resultCSRWire.sstatus   := RegNext(mstatus & sstatusRmask)
-      // resultCSRWire.sepc      := RegNext(sepc)
-      // resultCSRWire.stval     := RegNext(stval)
-      
-      // resultCSRWire.stvec     := RegNext(stvec)
-      // resultCSRWire.scause    := RegNext(scause)
+      resultCSRWire.stvec     := RegNext(stvec)
+      resultCSRWire.mcause    := RegNext(mcause)
+      resultCSRWire.scause    := RegNext(scause)
       // resultCSRWire.satp      := RegNext(satp)
-      
-      // resultCSRWire.sscratch  := RegNext(sscratch)
-
+      resultCSRWire.mip       := RegNext(mipReg) //FIXME: 为什么是mipReg
+      resultCSRWire.mie       := RegNext(mie)
+      resultCSRWire.mscratch  := RegNext(mscratch)
+      resultCSRWire.sscratch  := RegNext(sscratch)
+      resultCSRWire.mideleg   := RegNext(mideleg)
+      resultCSRWire.medeleg   := RegNext(medeleg)
+      // resultCSRWire.cycle     := 0.U //FIXME: how to deal with unimplemented CSRs
     }
     if (!p.FPGAPlatform) {
       BoringUtils.addSource(readWithScala(perfCntList("Mcycle")._1), "simCycleCnt")
