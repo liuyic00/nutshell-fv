@@ -27,7 +27,11 @@ jobs:
         uses: coursier/cache-action@v5
       - name: mill Test
         run: mill _.test
+      - name: Single BtorMC Run 15 Steps
+        if: always()
+        run: btormc ./test_run_dir/NutCoreFormal_should_pass/NutCore.btor -kmax 15 --trace-gen-full --btor-stats > 15step.txt
       - name: Archive production artifacts
+        if: always()
         uses: actions/upload-artifact@v3
         with:
           name: Btormc Output Files
