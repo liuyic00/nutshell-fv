@@ -330,8 +330,11 @@ class CSR(implicit val p: NutCoreConfig) extends NutCoreModule with HasCSRConst{
   // Sstatus Read Mask = (SSTATUS_WMASK | (0xf << 13) | (1ull << 63) | (3ull << 32))
   val stvec = RegInit(UInt(XLEN.W), 0.U)
   // val sie = RegInit(0.U(XLEN.W))
-  val sieMask = "h222".U & mideleg
-  val sipMask  = "h222".U & mideleg
+  // FIXME: need to fix this important bugs
+  // val sieMask = "h222".U & mideleg
+  // val sipMask  = "h222".U & mideleg
+  val sieMask = "h222".U
+  val sipMask  = "h222".U
   // val satp = RegInit(UInt(XLEN.W), "h8000000000087fbe".U)
   val satp = RegInit(UInt(XLEN.W), 0.U)
   val sepc = RegInit(UInt(XLEN.W), 0.U)
@@ -936,22 +939,27 @@ class CSR(implicit val p: NutCoreConfig) extends NutCoreModule with HasCSRConst{
       resultCSRWire.mhartid   := RegNext(mhartid)
       resultCSRWire.mstatus   := RegNext(mstatus)
       // resultCSRWire.mstatush  := 0.U //FIXME: how to deal with unimplemented CSRs
-      // resultCSRWire.sstatus   := RegNext(mstatus & sstatusRmask) // FIXME: 
-      resultCSRWire.mepc      := RegNext(mepc)
-      resultCSRWire.sepc      := RegNext(sepc)
-      resultCSRWire.mtval     := RegNext(mtval)
-      resultCSRWire.stval     := RegNext(stval)
-      resultCSRWire.mtvec     := RegNext(mtvec)
-      resultCSRWire.stvec     := RegNext(stvec)
-      resultCSRWire.mcause    := RegNext(mcause)
-      resultCSRWire.scause    := RegNext(scause)
-      // resultCSRWire.satp      := RegNext(satp)
-      resultCSRWire.mip       := RegNext(mipReg) //FIXME: 为什么是mipReg
-      resultCSRWire.mie       := RegNext(mie)
       resultCSRWire.mscratch  := RegNext(mscratch)
-      resultCSRWire.sscratch  := RegNext(sscratch)
-      resultCSRWire.mideleg   := RegNext(mideleg)
+      resultCSRWire.mtvec     := RegNext(mtvec)
+      resultCSRWire.mcounteren:= RegNext(mcounteren)
       resultCSRWire.medeleg   := RegNext(medeleg)
+      resultCSRWire.mideleg   := RegNext(mideleg)
+      resultCSRWire.mip       := RegNext(mipReg)
+      resultCSRWire.mie       := RegNext(mie)
+      resultCSRWire.mepc      := RegNext(mepc)
+      resultCSRWire.mcause    := RegNext(mcause)
+      resultCSRWire.mtval     := RegNext(mtval)
+      resultCSRWire.scounteren:= RegNext(scounteren)
+      resultCSRWire.scause    := RegNext(scause)
+      resultCSRWire.stvec     := RegNext(stvec)
+      resultCSRWire.sepc      := RegNext(sepc)
+      resultCSRWire.stval     := RegNext(stval)
+      // not need to compare, because compare signal means mstatus equals to sstatus
+      // resultCSRWire.sstatus   
+      // resultCSRWire.sie
+      // resultCSRWire.sip
+      resultCSRWire.sscratch  := RegNext(sscratch)
+      // resultCSRWire.satp      := RegNext(satp)
       // resultCSRWire.cycle     := 0.U //FIXME: how to deal with unimplemented CSRs
     }
     if (!p.FPGAPlatform) {

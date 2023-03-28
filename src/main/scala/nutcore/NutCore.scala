@@ -71,7 +71,7 @@ case class NutCoreConfig (
   EnableILA: Boolean = Settings.get("EnableILA"),
   EnableDebug: Boolean = Settings.get("EnableDebug"),
   EnhancedLog: Boolean = true ,
-  FormalConfig: RV64Config = RV64Config("MCU")
+  FormalConfig: RV64Config = RV64Config("MCS")
 )
 // Enable EnhancedLog will slow down simulation, 
 // but make it possible to control debug log using emu parameter
