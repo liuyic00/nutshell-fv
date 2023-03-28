@@ -130,7 +130,11 @@ class Frontend_inorder(implicit val p: NutCoreConfig) extends NutCoreModule with
     when (ibf.io.out.valid){
       // assume(RVI.regImm(tmpInst) || RVI.loadStore(tmpInst))
       // assume(RVI.loadStore(tmpInst))
-      assume(hasCSR(tmpInst(31,20)) && (RVZicsr.reg(tmpInst) || RVZicsr.imm(tmpInst)))
+      assume(
+        (hasCSR(tmpInst(31,20)) && (RVZicsr.reg(tmpInst) || RVZicsr.imm(tmpInst))) 
+        || 
+        (  RVI.regImm(tmpInst) || RVI.loadStore(tmpInst)  )
+      )
     }
   }
 
