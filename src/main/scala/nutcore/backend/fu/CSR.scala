@@ -926,9 +926,9 @@ class CSR(implicit val p: NutCoreConfig) extends NutCoreModule with HasCSRConst{
     if (p.Formal) {
       val resultCSRWire = rvspeccore.checker.ConnectCheckerResult.makeCSRSource()(64, p.FormalConfig)
       val resultEventWire = rvspeccore.checker.ConnectCheckerResult.makeEventSource()(64, p.FormalConfig)
-      resultEventWire.valid := RegNext(RegNext((raiseIntr && io.instrValid && valid) || (raiseException && io.instrValid && valid)))
+      resultEventWire.valid := RegNext(RegNext((raiseIntr && io.instrValid) || (raiseException && io.instrValid), 0.U), 0.U)
       resultEventWire.intrNO := RegNext(RegNext(Mux(raiseIntr && io.instrValid && valid, intrNO, 0.U)))
-      resultEventWire.cause := RegNext(RegNext(Mux(raiseException && io.instrValid && valid, exceptionNO, 0.U)))
+      resultEventWire.cause := RegNext(RegNext(Mux(raiseException && io.instrValid, exceptionNO, 0.U)))
       resultEventWire.exceptionPC := RegNext(RegNext(SignExt(io.cfIn.pc, XLEN)))
       resultEventWire.exceptionInst := RegNext(RegNext(io.cfIn.instr))
       
