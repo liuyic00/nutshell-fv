@@ -24,7 +24,7 @@ import bus.axi4._
 import chisel3.experimental.IO
 import utils._
 import top.Settings
-
+import rvspeccore.core.tool.TLBSig
 trait HasTLBIO extends HasNutCoreParameter with HasTlbConst with HasCSRConst {
   class TLBIO extends Bundle {
     val in = Flipped(new SimpleBusUC(userBits = userBits, addrBits = VAddrBits))
@@ -235,7 +235,13 @@ class EmbeddedTLBExec(implicit val tlbConfig: TLBConfig) extends TlbModule{
   if (tlbname == "dtlb") {
     BoringUtils.addSink(isAMO, "ISAMO")
   }
-
+  val resultTLBWire = Wire(new TLBSig()(64))
+  if (tlbname == "itlb"){
+    resultTLBWire := rvspeccore.checker.ConnectCheckerResult.makeTLBSource(false)(64)
+  }
+  if (tlbname == "dtlb"){
+    resultTLBWire := rvspeccore.checker.ConnectCheckerResult.makeTLBSource(true)(64)
+  }
   io.pf.loadPF := RegNext(loadPF, init =false.B)
   io.pf.storePF := RegNext(storePF, init = false.B)
 
@@ -290,10 +296,13 @@ class EmbeddedTLBExec(implicit val tlbConfig: TLBConfig) extends TlbModule{
         needFlush := false.B
       }.elsewhen (io.mem.req.fire) { state := s_memReadResp}
     }
-
     is (s_memReadResp) { 
       val missflag = memRdata.flag.asTypeOf(flagBundle)
       when (io.mem.resp.fire) {
+        resultTLBWire.read.valid := true.B
+        resultTLBWire.read.addr  := io.mem.req.bits.addr
+        resultTLBWire.read.data  := io.mem.resp.bits.rdata
+        resultTLBWire.read.level := (level-1.U)
         when (isFlush) {
           state := s_idle
           needFlush := false.B
