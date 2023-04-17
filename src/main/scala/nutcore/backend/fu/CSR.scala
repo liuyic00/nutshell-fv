@@ -959,7 +959,15 @@ class CSR(implicit val p: NutCoreConfig) extends NutCoreModule with HasCSRConst{
       // resultCSRWire.sie
       // resultCSRWire.sip
       resultCSRWire.sscratch  := RegNext(sscratch)
-      // resultCSRWire.satp      := RegNext(satp)
+      resultCSRWire.satp      := RegNext(satp)
+      resultCSRWire.pmpcfg0   := RegNext(pmpcfg0)
+      resultCSRWire.pmpcfg1   := RegNext(pmpcfg1)
+      resultCSRWire.pmpcfg2   := RegNext(pmpcfg2)
+      resultCSRWire.pmpcfg3   := RegNext(pmpcfg3)
+      resultCSRWire.pmpaddr0  := RegNext(pmpaddr0)
+      resultCSRWire.pmpaddr1  := RegNext(pmpaddr1)
+      resultCSRWire.pmpaddr2  := RegNext(pmpaddr2)
+      resultCSRWire.pmpaddr3  := RegNext(pmpaddr3)
       // resultCSRWire.cycle     := 0.U //FIXME: how to deal with unimplemented CSRs
     }
     if (!p.FPGAPlatform) {
