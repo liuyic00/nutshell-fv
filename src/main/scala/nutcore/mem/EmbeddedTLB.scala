@@ -235,13 +235,14 @@ class EmbeddedTLBExec(implicit val tlbConfig: TLBConfig) extends TlbModule{
   if (tlbname == "dtlb") {
     BoringUtils.addSink(isAMO, "ISAMO")
   }
-  val resultTLBWire = Wire(new TLBSig()(64))
-  if (tlbname == "itlb"){
-    resultTLBWire := rvspeccore.checker.ConnectCheckerResult.makeTLBSource(false)(64)
-  }
-  if (tlbname == "dtlb"){
-    resultTLBWire := rvspeccore.checker.ConnectCheckerResult.makeTLBSource(true)(64)
-  }
+  // val resultTLBWire = Wire(new TLBSig()(64))
+  // if (tlbname == "itlb"){
+  //   resultTLBWire := rvspeccore.checker.ConnectCheckerResult.makeTLBSource(false)(64)
+  // }
+  // if (tlbname == "dtlb"){
+  //   resultTLBWire := rvspeccore.checker.ConnectCheckerResult.makeTLBSource(true)(64)
+  // }
+  val resultTLBWire = rvspeccore.checker.ConnectCheckerResult.makeTLBSource(if(tlbname == "itlb") false else true)(64)
   io.pf.loadPF := RegNext(loadPF, init =false.B)
   io.pf.storePF := RegNext(storePF, init = false.B)
 
@@ -273,7 +274,11 @@ class EmbeddedTLBExec(implicit val tlbConfig: TLBConfig) extends TlbModule{
   when (io.out.fire && needFlush) { needFlush := false.B}
 
   val missIPF = RegInit(false.B)
-
+  when(RegNext(io.mem.resp.fire, false.B)){
+    assert(RegNext(resultTLBWire.read.valid, false.B) === true.B)
+    assert(RegNext(resultTLBWire.read.addr, 0.U) === RegNext(io.mem.req.bits.addr, 0.U))
+    assert(RegNext(resultTLBWire.read.data, 0.U) === RegNext(io.mem.resp.bits.rdata, 0.U))
+  }
   // state machine to handle miss(ptw) and pte-writing-back
   switch (state) {
     is (s_idle) {
@@ -298,6 +303,7 @@ class EmbeddedTLBExec(implicit val tlbConfig: TLBConfig) extends TlbModule{
     }
     is (s_memReadResp) { 
       val missflag = memRdata.flag.asTypeOf(flagBundle)
+      assume(!(missflag.x && missflag.w && !missflag.r && missflag.v))
       when (io.mem.resp.fire) {
         resultTLBWire.read.valid := true.B
         resultTLBWire.read.addr  := io.mem.req.bits.addr
@@ -307,7 +313,13 @@ class EmbeddedTLBExec(implicit val tlbConfig: TLBConfig) extends TlbModule{
           state := s_idle
           needFlush := false.B
         }.elsewhen (!(missflag.r || missflag.x) && (level===3.U || level===2.U)) {
+          // !(0||1) && 1
+          //= 0
+          // hdd
+          // D A G U X W R V
+          // 1 1 0 1 1 1 0 1
           when(!missflag.v || (!missflag.r && missflag.w)) { //TODO: fix needflush
+            //        0 ||  (1 && 1)
             if(tlbname == "itlb") { state := s_wait_resp } else { state := s_miss_slpf }
             if(tlbname == "itlb") { missIPF := true.B }
             if(tlbname == "dtlb") { 
@@ -320,9 +332,12 @@ class EmbeddedTLBExec(implicit val tlbConfig: TLBConfig) extends TlbModule{
             Debug(false, "\n")
           }.otherwise {
             state := s_memReadReq
+            assume(memRdata.reserved === 0.U)
             raddr := paddrApply(memRdata.ppn, Mux(level === 3.U, vpn.vpn1, vpn.vpn0))
           }
         }.elsewhen (level =/= 0.U) { //TODO: fix needFlush
+          // D A G U X W R V
+          // 1 1 0 1 1 1 0 1
           val permCheck = missflag.v && !(pf.priviledgeMode === ModeU && !missflag.u) && !(pf.priviledgeMode === ModeS && missflag.u && (!pf.status_sum || ifecth))
           val permExec = permCheck && missflag.x
           val permLoad = permCheck && (missflag.r || pf.status_mxr && missflag.x)

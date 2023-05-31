@@ -276,6 +276,7 @@ class CSR(implicit val p: NutCoreConfig) extends NutCoreModule with HasCSRConst{
   val mimpid = RegInit(UInt(XLEN.W), 0.U) // provides a unique encoding of the version of the processor implementation
   val mhartid = RegInit(UInt(XLEN.W), 0.U) // the hardware thread running the code
   val mstatus = RegInit(UInt(XLEN.W), "h00001800".U)
+  // val mstatus = RegInit(UInt(XLEN.W), "h000E0800".U)
   // val mstatus = RegInit(UInt(XLEN.W), "h8000c0100".U)
   // mstatus Value Table
   // | sd   |
@@ -335,7 +336,7 @@ class CSR(implicit val p: NutCoreConfig) extends NutCoreModule with HasCSRConst{
   // val sipMask  = "h222".U & mideleg
   val sieMask = "h222".U
   val sipMask  = "h222".U
-  // val satp = RegInit(UInt(XLEN.W), "h8000000000087fbe".U)
+  // val satp = RegInit(UInt(XLEN.W), "h8000000000080002".U)
   val satp = RegInit(UInt(XLEN.W), 0.U)
   val sepc = RegInit(UInt(XLEN.W), 0.U)
   val scause = RegInit(UInt(XLEN.W), 0.U)
