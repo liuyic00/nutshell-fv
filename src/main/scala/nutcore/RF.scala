@@ -32,6 +32,8 @@ class RegFile extends HasRegFileParameter with HasNutCoreParameter {
   def read(addr: UInt) : UInt = Mux(addr === 0.U, 0.U, rf(addr))
   def write(addr: UInt, data: UInt) = { rf(addr) := data(XLEN-1,0) }
 
+  // Formal
+  // should wrapped by `if` here, but can not get NutCoreConfig
   val resultRegWire = Wire(Vec(32, UInt(XLEN.W)))
   resultRegWire := rf
   resultRegWire(0) := 0.U
