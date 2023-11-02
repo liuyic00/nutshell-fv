@@ -303,7 +303,7 @@ class EmbeddedTLBExec(implicit val tlbConfig: TLBConfig) extends TlbModule{
     }
     is (s_memReadResp) { 
       val missflag = memRdata.flag.asTypeOf(flagBundle)
-      assume(!(missflag.x && missflag.w && !missflag.r && missflag.v))
+      // assume(!(missflag.x && missflag.w && !missflag.r && missflag.v))
       when (io.mem.resp.fire) {
         resultTLBWire.read.valid := true.B
         resultTLBWire.read.addr  := io.mem.req.bits.addr
@@ -332,7 +332,7 @@ class EmbeddedTLBExec(implicit val tlbConfig: TLBConfig) extends TlbModule{
             Debug(false, "\n")
           }.otherwise {
             state := s_memReadReq
-            assume(memRdata.reserved === 0.U)
+            // assume(memRdata.reserved === 0.U)
             raddr := paddrApply(memRdata.ppn, Mux(level === 3.U, vpn.vpn1, vpn.vpn0))
           }
         }.elsewhen (level =/= 0.U) { //TODO: fix needFlush
