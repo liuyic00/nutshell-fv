@@ -28,7 +28,7 @@ trait HasChisel3 extends ScalaModule {
   }
   override def ivyDeps = Agg(
     ivy"edu.berkeley.cs::chisel3:3.5.4",
-    ivy"cn.ac.ios.tis::riscvspeccore:0.1.0"
+    ivy"cn.ac.ios.tis::riscvspeccore:1.0-SNAPSHOT"
   )
   override def scalacPluginIvyDeps = Agg(
     ivy"edu.berkeley.cs:::chisel3-plugin:3.5.4",

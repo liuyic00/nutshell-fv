@@ -24,6 +24,7 @@ import bus.simplebus._
 import bus.axi4._
 import utils._
 import top.Settings
+import rvspeccore.core.RV64Config
 
 trait HasNutCoreParameter {
   // General Parameter for NutShell
@@ -69,7 +70,8 @@ case class NutCoreConfig (
   Formal: Boolean = Settings.get("Formal"),
   EnableILA: Boolean = Settings.get("EnableILA"),
   EnableDebug: Boolean = Settings.get("EnableDebug"),
-  EnhancedLog: Boolean = true 
+  EnhancedLog: Boolean = true ,
+  FormalConfig: RV64Config = RV64Config("MCS")
 )
 // Enable EnhancedLog will slow down simulation, 
 // but make it possible to control debug log using emu parameter

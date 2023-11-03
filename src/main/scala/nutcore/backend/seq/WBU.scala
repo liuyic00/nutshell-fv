@@ -101,17 +101,17 @@ class WBU(implicit val p: NutCoreConfig) extends NutCoreModule{
       BoringUtils.addSource(io.wb.rfData, "ilaWBUrfData")
     }
     if (p.Formal) {
-      val checker = Module(new CheckerWithResult(checkMem = true)(RV64Config("")))
+      val checker = Module(new CheckerWithResult(checkMem = true)(p.FormalConfig))
 
       checker.io.instCommit.valid := RegNext(io.in.valid, false.B)
       checker.io.instCommit.inst  := RegNext(io.in.bits.decode.cf.instr)
       checker.io.instCommit.pc    := RegNext(SignExt(io.in.bits.decode.cf.pc, AddrBits))
 
-      ConnectCheckerResult.setChecker(checker, 2)(XLEN)
+      ConnectCheckerResult.setChecker(checker)(XLEN, p.FormalConfig)
 
-      when (RegNext(io.in.valid && rvspeccore.checker.RVI.loadStore(io.in.bits.decode.cf.instr)(64), false.B)) {
-        assert(false.B)
-      }
+      // when (RegNext(io.in.valid && rvspeccore.checker.RVI.loadStore(io.in.bits.decode.cf.instr)(64), false.B)) {
+      //   assert(false.B)
+      // }
     }
   }
 }

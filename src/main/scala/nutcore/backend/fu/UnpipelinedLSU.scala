@@ -430,8 +430,8 @@ class LSExecUnit extends NutCoreModule {
   io.storeAddrMisaligned := valid && (isStore || isAMO) && !addrAligned
 
   // Formal assume
-  assume(io.loadAddrMisaligned === false.B)
-  assume(io.storeAddrMisaligned === false.B)
+  // assume(io.loadAddrMisaligned === false.B)
+  // assume(io.storeAddrMisaligned === false.B)
 
   Debug(io.loadAddrMisaligned || io.storeAddrMisaligned, "misaligned addr detected\n")
 
