@@ -92,23 +92,6 @@ trait HasLSUConst {
   val storeQueueSize = 8
 }
 
-class LSUIO extends FunctionUnitIO {
-  val wdata = Input(UInt(XLEN.W))
-  // val instr = Input(UInt(32.W)) // Atom insts need aq rl funct3 bit from instr // TODO
-  val dmem = new SimpleBusUC(addrBits = VAddrBits, userBits = DCacheUserBundleWidth)
-  val dtlb = new SimpleBusUC(addrBits = VAddrBits, userBits = DCacheUserBundleWidth)
-  val mispredictRec = Flipped(new MisPredictionRecIO)
-  val stMaskIn = Input(UInt(robSize.W))
-  val robAllocate = Input(Valid(UInt(log2Up(robSize).W)))
-  val uopIn = Input(new RenamedDecodeIO)
-  val uopOut = Output(new RenamedDecodeIO)
-  val isMMIO = Output(Bool())
-  val exceptionVec = Output(Vec(16, Bool()))
-  val scommit = Input(Bool())
-  val commitStoreToCDB = Output(Bool())
-  val haveUnfinishedStore = Output(Bool())
-  val flush = Input(Bool())
-}
 
 class StoreQueueEntry extends NutCoreBundle{
   val pc       = UInt(VAddrBits.W)
