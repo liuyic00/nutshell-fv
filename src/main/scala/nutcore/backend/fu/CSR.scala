@@ -547,13 +547,6 @@ class CSR(implicit val p: NutCoreConfig) extends NutCoreModule with HasCSRConst{
   val lsuAddr = WireInit(0.U(64.W))
   BoringUtils.addSink(lsuAddr, "LSUADDR")
   if(EnableOutOfOrderExec){
-    hasInstrPageFault      := valid && io.cfIn.exceptionVec(instrPageFault)
-    hasLoadPageFault       := valid && io.cfIn.exceptionVec(loadPageFault)
-    hasStorePageFault      := valid && io.cfIn.exceptionVec(storePageFault)
-    hasStoreAddrMisaligned := valid && io.cfIn.exceptionVec(storeAddrMisaligned)
-    hasLoadAddrMisaligned  := valid && io.cfIn.exceptionVec(loadAddrMisaligned)
-    dmemPagefaultAddr := src1 // LSU -> wbresult -> prf -> beUop.data.src1
-    dmemAddrMisalignedAddr := src1
   }else{
     hasInstrPageFault := io.cfIn.exceptionVec(instrPageFault) && valid
     hasLoadPageFault := io.dmemMMU.loadPF
@@ -869,60 +862,6 @@ class CSR(implicit val p: NutCoreConfig) extends NutCoreModule with HasCSRConst{
   def readWithScala(addr: Int): UInt = mapping(addr)._1
 
   if (!p.FPGAPlatform) {
-    // to monitor
-    BoringUtils.addSource(readWithScala(perfCntList("Mcycle")._1), "simCycleCnt")
-    BoringUtils.addSource(readWithScala(perfCntList("Minstret")._1), "simInstrCnt")
-
-    if (hasPerfCnt) {
-      // display all perfcnt when nutcoretrap is executed
-      val PrintPerfCntToCSV = true
-      when (nutcoretrap) {
-        printf("======== PerfCnt =========\n")
-        perfCntList.toSeq.sortBy(_._2._1).map { case (name, (addr, boringId)) =>
-          printf("%d <- " + name + "\n", readWithScala(addr)) }
-        if(PrintPerfCntToCSV){
-        printf("======== PerfCntCSV =========\n\n")
-        perfCntList.toSeq.sortBy(_._2._1).map { case (name, (addr, boringId)) =>
-          printf(name + ", ")}
-        printf("\n\n\n")
-        perfCntList.toSeq.sortBy(_._2._1).map { case (name, (addr, boringId)) =>
-          printf("%d, ", readWithScala(addr)) }
-        printf("\n\n\n")
-        }
-      }
-    }
-
-    // for differential testing
-    val difftest = Module(new DifftestCSRState)
-    difftest.io.clock := clock
-    difftest.io.coreid := 0.U // TODO
-    difftest.io.priviledgeMode := RegNext(priviledgeMode)
-    difftest.io.mstatus := RegNext(mstatus)
-    difftest.io.sstatus := RegNext(mstatus & sstatusRmask)
-    difftest.io.mepc := RegNext(mepc)
-    difftest.io.sepc := RegNext(sepc)
-    difftest.io.mtval:= RegNext(mtval)
-    difftest.io.stval:= RegNext(stval)
-    difftest.io.mtvec := RegNext(mtvec)
-    difftest.io.stvec := RegNext(stvec)
-    difftest.io.mcause := RegNext(mcause)
-    difftest.io.scause := RegNext(scause)
-    difftest.io.satp := RegNext(satp)
-    difftest.io.mip := RegNext(mipReg)
-    difftest.io.mie := RegNext(mie)
-    difftest.io.mscratch := RegNext(mscratch)
-    difftest.io.sscratch := RegNext(sscratch)
-    difftest.io.mideleg := RegNext(mideleg)
-    difftest.io.medeleg := RegNext(medeleg)
-
-    val difftestArchEvent = Module(new DifftestArchEvent)
-    difftestArchEvent.io.clock := clock
-    difftestArchEvent.io.coreid := 0.U // TODO
-    difftestArchEvent.io.intrNO := RegNext(RegNext(Mux(raiseIntr && io.instrValid && valid, intrNO, 0.U)))
-    difftestArchEvent.io.cause := RegNext(RegNext(Mux(raiseException && io.instrValid && valid, exceptionNO, 0.U)))
-    difftestArchEvent.io.exceptionPC := RegNext(RegNext(SignExt(io.cfIn.pc, XLEN)))
-    difftestArchEvent.io.exceptionInst := RegNext(RegNext(io.cfIn.instr))
-
   } else {
     if (p.Formal) {
       val resultCSRWire = rvspeccore.checker.ConnectCheckerResult.makeCSRSource()(64, p.FormalConfig)
@@ -972,11 +911,8 @@ class CSR(implicit val p: NutCoreConfig) extends NutCoreModule with HasCSRConst{
       // resultCSRWire.cycle     := 0.U //FIXME: how to deal with unimplemented CSRs
     }
     if (!p.FPGAPlatform) {
-      BoringUtils.addSource(readWithScala(perfCntList("Mcycle")._1), "simCycleCnt")
-      BoringUtils.addSource(readWithScala(perfCntList("Minstret")._1), "simInstrCnt")
     } else {
       if (p.EnableILA) {
-        BoringUtils.addSource(readWithScala(perfCntList("Minstret")._1), "ilaInstrCnt")
       }
     }
   }
