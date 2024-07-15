@@ -42,12 +42,23 @@ class WBU(implicit val p: NutCoreConfig) extends NutCoreModule{
   val falseWire = WireInit(false.B) // make BoringUtils.addSource happy
   BoringUtils.addSource(io.in.valid, "perfCntCondMinstret")
   BoringUtils.addSource(falseWire, "perfCntCondMultiCommit")
-  
   if (!p.FPGAPlatform) {
   } else {
     if (p.EnableILA) {
     }
     if (p.Formal) {
+      val valid = RegNext(io.in.valid, false.B)
+      val inst = RegNext(io.in.bits.decode.cf.instr, 0.U)
+      val pc = RegNext(SignExt(io.in.bits.decode.cf.pc, AddrBits), 0.U)
+
+      
+
+      when (valid) {
+        assert(inst === BitPat("b????????????_?????_000_?????_0010011"))
+
+        
+      }
+
     }
   }
 }
