@@ -22,7 +22,6 @@ import chisel3.util.experimental.BoringUtils
 
 import utils._
 import top.Settings
-import difftest._
 
 object CSROpType {
   def jmp  = "b000".U

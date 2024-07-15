@@ -39,17 +39,12 @@ trait HasChiselTests extends SbtModule {
 
 trait CommonNS extends SbtModule with CommonModule with HasChiselCross with HasRiscvSpecCore
 
-object difftest extends Cross[CommonNS](ivys.chiselCrossVersions.keys.toSeq){
-  override def millSourcePath = os.pwd / "difftest"
-}
-
 object chiselModule extends Cross[ChiselModule](ivys.chiselCrossVersions.keys.toSeq)
 
 trait ChiselModule extends CommonNS with Cross.Module[String] with HasChiselTests {
   override def millSourcePath = os.pwd
 
   override def moduleDeps = super.moduleDeps ++ Seq(
-    difftest(crossValue)
   )
 }
 
