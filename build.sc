@@ -22,22 +22,13 @@ trait HasChiselCross extends ScalaModule with Cross.Module[String]{
   override def scalacPluginIvyDeps = Agg(ivys.chiselCrossVersions(crossValue)._2)
 }
 
-trait HasRiscvSpecCore extends ScalaModule with Cross.Module[String]{
-  override def repositoriesTask = T.task {
-    super.repositoriesTask() ++ Seq(
-      MavenRepository("https://s01.oss.sonatype.org/content/repositories/snapshots")
-    )
-  }
-  override def ivyDeps = Agg(ivy"cn.ac.ios.tis::riscvspeccore:1.1-SNAPSHOT")
-}
-
 trait HasChiselTests extends SbtModule {
   object test extends SbtModuleTests with TestModule.ScalaTest {
     override def ivyDeps = Agg(ivy"edu.berkeley.cs::chiseltest:0.6.0")
   }
 }
 
-trait CommonNS extends SbtModule with CommonModule with HasChiselCross with HasRiscvSpecCore
+trait CommonNS extends SbtModule with CommonModule with HasChiselCross
 
 object chiselModule extends Cross[ChiselModule](ivys.chiselCrossVersions.keys.toSeq)
 

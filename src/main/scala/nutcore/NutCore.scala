@@ -23,7 +23,6 @@ import chisel3.util.experimental.BoringUtils
 import bus.simplebus._
 import utils._
 import top.Settings
-import rvspeccore.core.RVConfig
 
 trait HasNutCoreParameter {
   // General Parameter for NutShell
@@ -70,7 +69,6 @@ case class NutCoreConfig (
   EnableILA: Boolean = Settings.get("EnableILA"),
   EnableDebug: Boolean = Settings.get("EnableDebug"),
   EnhancedLog: Boolean = true ,
-  FormalConfig: RVConfig = RVConfig(64, "MCS", "A")
 )
 // Enable EnhancedLog will slow down simulation,
 // but make it possible to control debug log using emu parameter
@@ -162,28 +160,6 @@ class NutCore(implicit val p: NutCoreConfig) extends NutCoreModule {
         width := sz2wth(backend.io.dmem.req.bits.size)
       }
 
-      val mem = rvspeccore.checker.ConnectCheckerResult.makeMemSource()(64)
-
-      when(backend.io.dmem.resp.fire) {
-        // load or store complete
-        when(isRead) {
-          isRead       := false.B
-          mem.read.valid := true.B
-          mem.read.addr  := SignExt(addr, 64)
-          mem.read.data  := backend.io.dmem.resp.bits.rdata
-          mem.read.memWidth := width
-        }.elsewhen(isWrite) {
-          isWrite       := false.B
-          mem.write.valid := true.B
-          mem.write.addr  := SignExt(addr, 64)
-          mem.write.data  := wdata
-          mem.write.memWidth := width
-          // pass addr wdata wmask
-        }.otherwise {
-          // assert(false.B)
-          // may receive some acceptable error resp, but microstructure can handle
-        }
-      }
     }
   }
 
