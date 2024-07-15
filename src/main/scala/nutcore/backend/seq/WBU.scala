@@ -51,12 +51,22 @@ class WBU(implicit val p: NutCoreConfig) extends NutCoreModule{
       val inst = RegNext(io.in.bits.decode.cf.instr, 0.U)
       val pc = RegNext(SignExt(io.in.bits.decode.cf.pc, AddrBits), 0.U)
 
-      
+      val regVec = Wire(Vec(32, UInt(XLEN.W)))
+      regVec := DontCare
+      BoringUtils.addSink(regVec, "UniqueIdReg")
+      val regs = RegNext(regVec)
 
       when (valid) {
         assert(inst === BitPat("b????????????_?????_000_?????_0010011"))
+        val rd = inst(11, 7)
+        val rs1 = inst(19, 15)
+        val imm = SignExt(inst(31, 20), AddrBits)
+        when (rd =/= 0.U) {
+          assert(regVec(rd) === (regs(rs1) + imm))
+        }.otherwise {
+          assert(regVec(rd) === 0.U)
+        }
 
-        
       }
 
     }
