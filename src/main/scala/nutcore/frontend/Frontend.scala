@@ -62,6 +62,10 @@ class Frontend_inorder(implicit val p: NutCoreConfig) extends NutCoreModule with
   io.ipf <> ifu.io.ipf
   io.imem <> ifu.io.imem
   if (p.Formal) {
+    val tmpInst = ibf.io.out.bits.instr(31, 0)
+    when (ibf.io.out.valid) {
+      assume(tmpInst === BitPat("b????????????_?????_000_?????_0010011")) // ADDI
+    }
   }
 
   Debug("------------------------ FRONTEND:------------------------\n")
