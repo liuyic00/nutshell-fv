@@ -4,7 +4,7 @@ import nutcore._
 
 object EmitNutCore extends App {
   // config
-  val s = (FormalSettings()) ++ (InOrderSettings())
+  val s = (FormalSettings()) ++ (InOrderSettings()) ++ Map("Formal" -> false, "RVFI" -> true)
   s.foreach { Settings.settings += _ }
   Settings.settings.toList.sortBy(_._1)(Ordering.String).foreach {
     case (f, v: Long) =>

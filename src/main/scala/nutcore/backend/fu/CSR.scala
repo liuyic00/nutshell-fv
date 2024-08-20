@@ -971,6 +971,9 @@ class CSR(implicit val p: NutCoreConfig) extends NutCoreModule with HasCSRConst{
       resultCSRWire.pmpaddr3  := RegNext(pmpaddr3)
       // resultCSRWire.cycle     := 0.U //FIXME: how to deal with unimplemented CSRs
     }
+    if (p.RVFI) {
+      BoringUtils.addSource(RegNext((raiseIntr && io.instrValid) || (raiseException && io.instrValid), 0.U), "rvfi_trap")
+    }
     if (!p.FPGAPlatform) {
       BoringUtils.addSource(readWithScala(perfCntList("Mcycle")._1), "simCycleCnt")
       BoringUtils.addSource(readWithScala(perfCntList("Minstret")._1), "simInstrCnt")

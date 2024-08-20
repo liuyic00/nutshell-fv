@@ -60,6 +60,42 @@ class EXU(implicit val p: NutCoreConfig) extends NutCoreModule {
   io.dmem <> lsu.io.dmem
   lsu.io.out.ready := true.B
 
+  io.out.bits.mem_rvfi := DontCare
+
+  if (p.RVFI) {
+    def sz2wth(size: UInt) = {
+        MuxLookup(size, 0.U, List(
+          0.U -> 8.U,
+          1.U -> 16.U,
+          2.U -> 32.U,
+          3.U -> 64.U
+        ))
+      }
+    val mem_rvfi_reg = RegInit(0.U.asTypeOf(new RVFIMem))
+    when (fuType === FuType.lsu) {
+      io.out.bits.mem_rvfi := mem_rvfi_reg
+
+      when(io.dmem.req.valid) {
+        io.out.bits.mem_rvfi.addr := io.dmem.req.bits.addr
+        io.out.bits.mem_rvfi.rmask := sz2wth(io.dmem.req.bits.size)
+        io.out.bits.mem_rvfi.wdata := io.dmem.req.bits.wdata
+        io.out.bits.mem_rvfi.wmask := io.dmem.req.bits.wmask
+
+        mem_rvfi_reg.addr := io.dmem.req.bits.addr
+        mem_rvfi_reg.rmask := sz2wth(io.dmem.req.bits.size)
+        mem_rvfi_reg.wdata := io.dmem.req.bits.wdata
+        mem_rvfi_reg.wmask := io.dmem.req.bits.wmask
+      }
+      when(io.dmem.resp.valid) {
+        io.out.bits.mem_rvfi.rdata := io.dmem.resp.bits.rdata
+
+        mem_rvfi_reg.rdata := io.dmem.resp.bits.rdata
+      }
+    }.otherwise {
+      io.out.bits.mem_rvfi := 0.U.asTypeOf(new RVFIMem)
+    }
+  }
+
   val mdu = Module(new MDU)
   val mduOut = mdu.access(valid = fuValids(FuType.mdu), src1 = src1, src2 = src2, func = fuOpType)
   mdu.io.out.ready := true.B

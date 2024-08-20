@@ -242,7 +242,6 @@ class EmbeddedTLBExec(implicit val tlbConfig: TLBConfig) extends TlbModule{
   // if (tlbname == "dtlb"){
   //   resultTLBWire := rvspeccore.checker.ConnectCheckerResult.makeTLBSource(true)(64)
   // }
-  val resultTLBWire = rvspeccore.checker.ConnectCheckerResult.makeTLBSource(if(tlbname == "itlb") false else true)(64)
   io.pf.loadPF := RegNext(loadPF, init =false.B)
   io.pf.storePF := RegNext(storePF, init = false.B)
 
@@ -274,11 +273,6 @@ class EmbeddedTLBExec(implicit val tlbConfig: TLBConfig) extends TlbModule{
   when (io.out.fire && needFlush) { needFlush := false.B}
 
   val missIPF = RegInit(false.B)
-  when(RegNext(io.mem.resp.fire, false.B)){
-    assert(RegNext(resultTLBWire.read.valid, false.B) === true.B)
-    assert(RegNext(resultTLBWire.read.addr, 0.U) === RegNext(io.mem.req.bits.addr, 0.U))
-    assert(RegNext(resultTLBWire.read.data, 0.U) === RegNext(io.mem.resp.bits.rdata, 0.U))
-  }
   // state machine to handle miss(ptw) and pte-writing-back
   switch (state) {
     is (s_idle) {
@@ -305,10 +299,6 @@ class EmbeddedTLBExec(implicit val tlbConfig: TLBConfig) extends TlbModule{
       val missflag = memRdata.flag.asTypeOf(flagBundle)
       // assume(!(missflag.x && missflag.w && !missflag.r && missflag.v))
       when (io.mem.resp.fire) {
-        resultTLBWire.read.valid := true.B
-        resultTLBWire.read.addr  := io.mem.req.bits.addr
-        resultTLBWire.read.data  := io.mem.resp.bits.rdata
-        resultTLBWire.read.level := (level-1.U)
         when (isFlush) {
           state := s_idle
           needFlush := false.B

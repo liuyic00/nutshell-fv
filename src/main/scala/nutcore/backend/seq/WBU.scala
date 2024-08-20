@@ -112,5 +112,31 @@ class WBU(implicit val p: NutCoreConfig) extends NutCoreModule{
       //   assert(false.B)
       // }
     }
+    if (p.RVFI) {
+      BoringUtils.addSource(io.in.valid, "rvfi_valid")
+      val rvfi_order = RegInit(0.U(64.W))
+      when(io.in.valid) {
+        rvfi_order := rvfi_order + 1.U
+      }
+      BoringUtils.addSource(rvfi_order, "rvfi_order")
+      BoringUtils.addSource(io.in.bits.decode.cf.instr, "rvfi_insn")
+
+      BoringUtils.addSource(io.in.bits.decode.ctrl.rfSrc1, "rvfi_rs1_addr")
+      BoringUtils.addSource(io.in.bits.decode.ctrl.rfSrc1, "rvfi_rs2_addr")
+      BoringUtils.addSource(io.in.bits.decode.data.src1, "rvfi_rs1_rdata")
+      BoringUtils.addSource(io.in.bits.decode.data.src2, "rvfi_rs2_rdata")
+      BoringUtils.addSource(io.wb.rfDest, "rvfi_rd_addr")
+      BoringUtils.addSource(io.wb.rfData, "rvfi_rd_wdata")
+      BoringUtils.addSource(SignExt(io.in.bits.decode.cf.pc, AddrBits), "rvfi_pc_rdata")
+      BoringUtils.addSource(
+        Mux(io.redirect.valid, io.redirect.target, SignExt(io.in.bits.decode.cf.pc, AddrBits) + 4.U),
+        "rvfi_pc_wdata"
+      )
+      BoringUtils.addSource(io.in.bits.mem_rvfi.addr, "rvfi_mem_addr")
+      BoringUtils.addSource(io.in.bits.mem_rvfi.rmask, "rvfi_mem_rmask")
+      BoringUtils.addSource(io.in.bits.mem_rvfi.wmask, "rvfi_mem_wmask")
+      BoringUtils.addSource(io.in.bits.mem_rvfi.rdata, "rvfi_mem_rdata")
+      BoringUtils.addSource(io.in.bits.mem_rvfi.wdata, "rvfi_mem_wdata")
+    }
   }
 }

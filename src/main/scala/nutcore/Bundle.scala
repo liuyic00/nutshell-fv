@@ -85,6 +85,7 @@ class CommitIO extends NutCoreBundle {
   val isMMIO = Output(Bool())
   val intrNO = Output(UInt(XLEN.W))
   val commits = Output(Vec(FuType.num, UInt(XLEN.W)))
+  val mem_rvfi = new RVFIMem
 }
 
 class OOCommitIO extends NutCoreBundle with HasBackendConst{

@@ -68,6 +68,7 @@ abstract class NutCoreBundle extends Bundle with HasNutCoreParameter with HasNut
 case class NutCoreConfig (
   FPGAPlatform: Boolean = true,
   Formal: Boolean = Settings.get("Formal"),
+  RVFI: Boolean = Settings.get("RVFI"),
   EnableILA: Boolean = Settings.get("EnableILA"),
   EnableDebug: Boolean = Settings.get("EnableDebug"),
   EnhancedLog: Boolean = true ,
@@ -102,6 +103,7 @@ class NutCore(implicit val p: NutCoreConfig) extends NutCoreModule {
     val dmem = new SimpleBusC
     val mmio = new SimpleBusUC
     val frontend = Flipped(new SimpleBusUC())
+    val rvfi = if (p.RVFI) Some(new RVFIIO) else None
   }
   val io = IO(new NutCoreIO)
 
@@ -229,6 +231,30 @@ class NutCore(implicit val p: NutCoreConfig) extends NutCoreModule {
           // may receive some acceptable error resp, but microstructure can handle
         }
       }
+    }
+    if (p.RVFI) {
+      io.rvfi.get := DontCare
+      BoringUtils.addSink(io.rvfi.get.valid, "rvfi_valid")
+      BoringUtils.addSink(io.rvfi.get.order, "rvfi_order")
+      BoringUtils.addSink(io.rvfi.get.insn, "rvfi_insn")
+      BoringUtils.addSink(io.rvfi.get.trap, "rvfi_trap")
+      io.rvfi.get.halt := false.B
+      io.rvfi.get.intr := false.B
+      io.rvfi.get.mode := 3.U
+      io.rvfi.get.ixl  := 1.U
+      BoringUtils.addSink(io.rvfi.get.rs1_addr, "rvfi_rs1_addr")
+      BoringUtils.addSink(io.rvfi.get.rs2_addr, "rvfi_rs2_addr")
+      BoringUtils.addSink(io.rvfi.get.rs1_rdata, "rvfi_rs1_rdata")
+      BoringUtils.addSink(io.rvfi.get.rs2_rdata, "rvfi_rs2_rdata")
+      BoringUtils.addSink(io.rvfi.get.rd_addr, "rvfi_rd_addr")
+      BoringUtils.addSink(io.rvfi.get.rd_wdata, "rvfi_rd_wdata")
+      BoringUtils.addSink(io.rvfi.get.pc_rdata, "rvfi_pc_rdata")
+      BoringUtils.addSink(io.rvfi.get.pc_wdata, "rvfi_pc_wdata")
+      BoringUtils.addSink(io.rvfi.get.mem_addr, "rvfi_mem_addr")
+      BoringUtils.addSink(io.rvfi.get.mem_rmask, "rvfi_mem_rmask")
+      BoringUtils.addSink(io.rvfi.get.mem_wmask, "rvfi_mem_wmask")
+      BoringUtils.addSink(io.rvfi.get.mem_rdata, "rvfi_mem_rdata")
+      BoringUtils.addSink(io.rvfi.get.mem_wdata, "rvfi_mem_wdata")
     }
   }
 
