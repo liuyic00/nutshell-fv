@@ -72,10 +72,10 @@ case class NutCoreConfig (
   EnableDebug: Boolean = Settings.get("EnableDebug"),
   EnhancedLog: Boolean = true ,
   FormalConfig: RVConfig = RVConfig(
-    "XLEN" -> 64,
-    "extensions" -> "MCZicsrZifenceiSU",
-    "fakeExtensions" -> "A",
-    "functions" -> Seq("Privileged")
+    XLEN = 64,
+    extensions =  "MCZicsrZifenceiSU",
+    fakeExtensions = "A",
+    functions = Seq("Privileged", "TLB")
   )
 )
 // Enable EnhancedLog will slow down simulation, 
