@@ -25,12 +25,6 @@ jobs:
           mill-version: 0.11.5
       - name: Cache Scala
         uses: coursier/cache-action@v5
-      - name: PublishLocal riscv-spec-core
-        run: |
-          git clone https://github.com/iscas-tis/riscv-spec-core
-          cd riscv-spec-core
-          git checkout d826f38
-          sbt publishLocal -DChiselVersion=3.6.0 -DScalaVersion=2.12.17 -DHashId=true
       - name: mill Test
         run:  mill "chiselModule[3.6.0]".test
       # - name: Single BtorMC Run 15 Steps
