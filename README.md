@@ -14,13 +14,44 @@ More information about NutShell see its
 
 ## Run Verification Directly
 
-Clone submodule:
+### Install Dependency
+
+Publish specific versions of riscv-spec-core from source.
+
+``` shell
+git clone https://github.com/iscas-tis/riscv-spec-core.git
+cd riscv-spec-core
+git checkout <commit-id>
+sbt publishLocal -DChiselVersion=3.6.0 -DScalaVersion=2.12.17 -DHashId=true
+cd ..
+```
+
+The `<commit-id>` can be found in [build.sc](build.sc):
+<code> override def ivyDeps = Agg(ivy"cn.ac.ios.tis::riscvspeccore:1.3-chisel3.6.0-***d826f38***-SNAPSHOT") </code>
+
+Install btormc:
 
 ```shell
+git clone https://github.com/Boolector/boolector.git
+cd boolector
+./contrib/setup-lingeling.sh
+./contrib/setup-btor2tools.sh
+./configure.sh && cd build && make -j$(nproc)
+sudo make install
+cd ../..
+```
+
+### Initialize This Project
+
+```shell
+git clone https://github.com/iscas-tis/nutshell-fv
+cd nutshell-fv
 git submodule update --init --recursive
 ```
 
-Run verification:
+### Run Verification
+
+In this project, run:
 
 ```shell
 mill "chiselModule[3.6.0]".test.testOnly formal.NutCoreFormalSpec
