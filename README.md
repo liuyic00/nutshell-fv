@@ -14,16 +14,34 @@ More information about NutShell see its
 
 ## Run Verification Directly
 
-Clone submodule:
+### Install Dependency
+
+Install btormc:
 
 ```shell
+git clone https://github.com/Boolector/boolector.git
+cd boolector
+./contrib/setup-lingeling.sh
+./contrib/setup-btor2tools.sh
+./configure.sh && cd build && make -j$(nproc)
+sudo make install
+cd ../..
+```
+
+### Initialize This Project
+
+```shell
+git clone https://github.com/iscas-tis/nutshell-fv
+cd nutshell-fv
 git submodule update --init --recursive
 ```
 
-Run verification:
+### Run Verification
+
+In this project, run:
 
 ```shell
-mill "chiselModule[3.6.0]".test.testOnly formal.NutCoreFormalSpec
+mill chiselModule.test.testOnly formal.NutCoreFormalSpec
 ```
 
 This will run the test case `formal.NutCoreFormalSpec`, which transforms NutCore
